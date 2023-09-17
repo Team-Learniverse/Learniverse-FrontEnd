@@ -73,7 +73,6 @@ const WebRTCContainer = () => {
     const socketConnection: CustomSocket = await io(MEDIA_SERVER_URL!, {
       transports: ['websocket'],
       path: '/server',
-      cors: { origin: '*' },
     });
     socketConnection.request = await socketPromise(socketConnection);
     setSocket(socketConnection);
