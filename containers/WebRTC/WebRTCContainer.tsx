@@ -31,6 +31,7 @@ import RTCVideo from './RTCVideo';
 import socketPromise from './socketPromise';
 
 const MEDIA_SERVER_URL = 'http://localhost:8080';
+// const MEDIA_SERVER_URL = 'https://learniverse-media.kro.kr:8080';
 
 const WebRTCContainer = () => {
   const router = useRouter();
@@ -73,7 +74,6 @@ const WebRTCContainer = () => {
     const socketConnection: CustomSocket = io(MEDIA_SERVER_URL!, {
       transports: ['websocket'],
       path: '/server',
-      withCredentials: true,
     });
     socketConnection.request = await socketPromise(socketConnection);
     setSocket(socketConnection);
