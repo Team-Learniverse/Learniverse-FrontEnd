@@ -31,7 +31,7 @@ import RTCVideo from './RTCVideo';
 import socketPromise from './socketPromise';
 
 // const MEDIA_SERVER_URL = 'http://localhost:8080';
-const MEDIA_SERVER_URL = 'https://learniverse-media.kro.kr:8080';
+const MEDIA_SERVER_URL = 'https://learniverse-media.kro.kr';
 
 const WebRTCContainer = () => {
   const router = useRouter();
@@ -71,9 +71,10 @@ const WebRTCContainer = () => {
   const connect = async () => {
     if (!curName || !curRoomId) return;
     const socketConnection: CustomSocket = await io(MEDIA_SERVER_URL!, {
-      transports: ['websocket'],
-      path: '/server',
+      transports: ['websocket', 'polling', 'flashsocket'],
+      secure: true,
     });
+
     socketConnection.request = await socketPromise(socketConnection);
     setSocket(socketConnection);
     console.log('1. socket connect', socketConnection);
@@ -134,6 +135,10 @@ const WebRTCContainer = () => {
 
     await produce('screenType', curName);
     socket.emit('getOriginProducers');
+
+    socket.on('connect_error', (error: any) => {
+      console.log('socket connection error:', error.message);
+    });
 
     socket.on('existedProducers', async (data: any) => {
       console.log('4-1. existedProducers (consumeList)', data);
