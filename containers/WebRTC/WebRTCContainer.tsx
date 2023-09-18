@@ -70,8 +70,7 @@ const WebRTCContainer = () => {
 
   const connect = async () => {
     if (!curName || !curRoomId) return;
-    console.log('connect');
-    const socketConnection: CustomSocket = io(MEDIA_SERVER_URL!, {
+    const socketConnection: CustomSocket = await io(MEDIA_SERVER_URL!, {
       transports: ['websocket'],
       path: '/server',
     });
