@@ -31,7 +31,7 @@ import RTCVideo from './RTCVideo';
 import socketPromise from './socketPromise';
 
 // const MEDIA_SERVER_URL = 'http://localhost:8080';
-const MEDIA_SERVER_URL = 'http://3.128.247.52:8080';
+const MEDIA_SERVER_URL = process.env.NEXT_PUBLIC_MEDIA_IP;
 
 const WebRTCContainer = () => {
   const router = useRouter();
