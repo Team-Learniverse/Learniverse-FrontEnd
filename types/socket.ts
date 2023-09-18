@@ -10,6 +10,10 @@ export interface ProducerList {
   producer_socket_id: string;
 }
 
+// interface CustomSocket extends Socket<DefaultEventsMap, DefaultEventsMap> {
+//   prototype: any; // 또는 필요한 타입으로 대체
+// }
+
 export interface CustomSocket extends SocketType {
   request?: (event: string, data?: any) => Promise<any>;
 }

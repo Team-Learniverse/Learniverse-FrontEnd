@@ -30,7 +30,7 @@ import { getTime } from '@/utils/getTime';
 import RTCVideo from './RTCVideo';
 import socketPromise from './socketPromise';
 
-const MEDIA_SERVER_URL = process.env.NEXT_PUBLIC_MEDIA_IP;
+const MEDIA_SERVER_URL = 'http://localhost:8080';
 
 const WebRTCContainer = () => {
   const router = useRouter();
@@ -70,9 +70,10 @@ const WebRTCContainer = () => {
   const connect = async () => {
     if (!curName || !curRoomId) return;
     console.log('connect');
-    const socketConnection: CustomSocket = await io(MEDIA_SERVER_URL!, {
+    const socketConnection: CustomSocket = io(MEDIA_SERVER_URL!, {
       transports: ['websocket'],
       path: '/server',
+      withCredentials: true,
     });
     socketConnection.request = await socketPromise(socketConnection);
     setSocket(socketConnection);
