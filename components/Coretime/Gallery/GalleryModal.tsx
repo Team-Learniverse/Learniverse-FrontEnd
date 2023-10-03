@@ -1,15 +1,15 @@
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { styled } from "styled-components";
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { styled } from 'styled-components';
 
-import { getCapture } from "@/apis/coretimes";
-import { LargeModal } from "@/components/Common/Modal";
-import { ImageListInfo } from "@/types/capture";
-import { formatHHMMSS } from "@/utils/getFormattedTime";
-import { getNickName } from "@/utils/getNicknames";
+import { getCapture } from '@/apis/coretimes';
+import { LargeModal } from '@/components/Common/Modal';
+import { ImageListInfo } from '@/types/capture';
+import { formatHHMMSS } from '@/utils/getFormattedTime';
+import { getNickName } from '@/utils/getNicknames';
 
-import { memberIdState } from "../../../recoil/atom";
+import { memberIdState } from '../../../recoil/atom';
 
 interface GalleryModalProps {
   curRoomId: string;

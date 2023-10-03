@@ -50,7 +50,7 @@ export default class MyDocument extends Document {
           />
           <meta name="description" content="Description" />
           <meta name="keywords" content="Keywords" />
-          <title>LearniVerse</title>
+          {/* <title>LearniVerse</title> */}
 
           <link rel="manifest" href="/manifest.json" />
           <link

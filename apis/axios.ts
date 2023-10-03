@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const client = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_APP_IP,
+  baseURL: 'https://learniverse-main.kro.kr/',
   headers: {
     'Content-type': 'application/json',
     // 'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_IP,
