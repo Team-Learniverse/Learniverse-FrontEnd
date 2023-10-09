@@ -1,10 +1,10 @@
-import { styled } from 'styled-components';
+import { styled } from "styled-components";
 
-import useModal from '@/hooks/useModal';
-import { IcAddStudyRoom } from '@/public/assets/icons';
+import useModal from "@/hooks/useModal";
+import { IcAddStudyRoom } from "@/public/assets/icons";
 
-import AddStudyroomModal from './Modal/AddStudyroomModal';
-import CompleteModal from './Modal/CompleteModal';
+import AddStudyroomModal from "./Modal/AddStudyroomModal";
+import CompleteModal from "./Modal/CompleteModal";
 
 const AddStudyroom = () => {
   const add = useModal();
@@ -21,14 +21,14 @@ const AddStudyroom = () => {
         <IcAddStudyRoom />
         스터디룸 생성
       </StAddStudyroomWrapper>
-      <StAddModalWrapper isShowing={add.isShowing}>
+      <StAddModalWrapper $showing={add.isShowing}>
         <AddStudyroomModal
           isShowing={add.isShowing}
           handleCreate={handleCreate}
           handleCancel={add.toggle}
         />
       </StAddModalWrapper>
-      <StCompleteModalWrapper isShowing={complete.isShowing}>
+      <StCompleteModalWrapper $showing={complete.isShowing}>
         <CompleteModal
           isShowing={complete.isShowing}
           handleCancel={complete.toggle}
@@ -57,8 +57,8 @@ const StAddStudyroomWrapper = styled.button`
   ${({ theme }) => theme.fonts.Title5};
 `;
 
-const StAddModalWrapper = styled.div<{ isShowing: boolean }>`
-  display: ${({ isShowing }) => (isShowing ? 'block' : 'none')};
+const StAddModalWrapper = styled.div<{ $showing: boolean }>`
+  display: ${({ $showing }) => ($showing ? 'block' : 'none')};
   position: fixed;
   top: 0;
   left: 0;
@@ -73,8 +73,8 @@ const StAddModalWrapper = styled.div<{ isShowing: boolean }>`
   background-color: rgba(0, 0, 0, 0.5);
 `;
 
-const StCompleteModalWrapper = styled.div<{ isShowing: boolean }>`
-  display: ${({ isShowing }) => (isShowing ? 'block' : 'none')};
+const StCompleteModalWrapper = styled.div<{ $showing: boolean }>`
+  display: ${({ $showing }) => ($showing ? 'block' : 'none')};
   position: fixed;
   top: 0;
   left: 0;

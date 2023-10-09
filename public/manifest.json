@@ -1,0 +1,38 @@
+{
+  "background_color": "#1e1f3b",
+  "description": "\ub098\uc758 \uc2a4\ud130\ub514\ub8f8\uc5d0\uc11c \ucf54\ub529\ud574\uc694, LearniVerse",
+  "display": "standalone",
+  "icons": [
+    {
+      "sizes": "192x192",
+      "src": "/icon-192x192.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "256x256",
+      "src": "/icon-256x256.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "384x384",
+      "src": "/icon-384x384.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "512x512",
+      "src": "/icon-512x512.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any maskable",
+      "sizes": "150x150",
+      "src": "/ms-icon-150x150.png",
+      "type": "image/png"
+    }
+  ],
+  "name": "LearniVerse",
+  "scope": "/",
+  "short_name": "LearniVerse",
+  "start_url": "/",
+  "theme_color": "#1e1f3b"
+}

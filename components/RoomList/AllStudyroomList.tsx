@@ -1,16 +1,19 @@
-import { useEffect, useState } from 'react';
-import { styled } from 'styled-components';
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { styled } from "styled-components";
 
-import { getRoomList } from '@/apis/roomList';
-import { StudyRoomInfo } from '@/types/studyroom';
+import { getRoomList } from "@/apis/roomList";
+import { memberIdState } from "@/recoil/atom";
+import { StudyRoomInfo } from "@/types/studyroom";
 
-import StudyroomCard from '../RoomCard/StudyroomCard';
+import StudyroomCard from "../RoomCard/StudyroomCard";
 
 const AllStudyroomList = () => {
   const [roomList, setRoomList] = useState<StudyRoomInfo[]>();
+  const memberId = useRecoilValue(memberIdState);
 
   const getAllRoom = async () => {
-    const rooms = await getRoomList();
+    const rooms = await getRoomList(memberId);
     setRoomList(rooms);
   };
 

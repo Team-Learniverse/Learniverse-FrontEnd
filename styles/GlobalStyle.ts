@@ -1,4 +1,4 @@
-import { createGlobalStyle, css } from 'styled-components';
+import { createGlobalStyle, css } from "styled-components";
 
 export const reset = css`
   html,
@@ -146,6 +146,11 @@ export const reset = css`
     &:focus {
       outline: none;
     }
+  }
+  hr {
+    border: none;
+    border-top: 0.06rem solid ${({ theme }) => theme.colors.White};
+    width: 100%;
   }
 `;
 

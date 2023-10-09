@@ -1,29 +1,49 @@
-import { useRouter } from 'next/router';
-import { css, styled } from 'styled-components';
+import { useRouter } from "next/router";
+import React, { useEffect, useRef } from "react";
+import { css, styled } from "styled-components";
 
-import useModal from '@/hooks/useModal';
-import { IcLogo, IcProfile } from '@/public/assets/icons';
+import useModal from "@/hooks/useModal";
+import { IcLogo, IcProfile } from "@/public/assets/icons";
 
-import HeaderModal from './HeaderModal';
+import HeaderModal from "./HeaderModal";
 
-const Header = () => {
+const Header: React.FC = () => {
   const router = useRouter();
   const { asPath } = router;
 
-  const { isShowing, toggle } = useModal();
+  const { isShowing, setShowing, toggle } = useModal();
+
+  const modalRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (buttonRef.current && buttonRef.current.contains(event.target as Node)) {
+      return;
+    }
+    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      setShowing(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <StHeaderWrapper path={asPath}>
+    <StHeaderWrapper $path={asPath}>
       <StHeader>
         <IcLogo
           onClick={() => {
             router.push('/home');
           }}
         />
-        <button type="button" onClick={toggle}>
+        <button type="button" onClick={toggle} ref={buttonRef}>
           <IcProfile />
         </button>
-        <StHeaderModalWrapper>
+        <StHeaderModalWrapper ref={modalRef}>
           <HeaderModal isShowing={isShowing} />
         </StHeaderModalWrapper>
       </StHeader>
@@ -33,13 +53,13 @@ const Header = () => {
 
 export default Header;
 
-const StHeaderWrapper = styled.header<{ path: string }>`
+const StHeaderWrapper = styled.header<{ $path: string }>`
   height: 9.6rem;
   padding: 5rem 10rem 0rem 5rem;
   box-sizing: border-box;
 
-  ${({ path }) =>
-    path === '/' &&
+  ${({ $path }) =>
+    $path === '/' &&
     css`
       display: none;
     `}

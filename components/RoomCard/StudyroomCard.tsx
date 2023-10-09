@@ -1,13 +1,19 @@
-import { useRouter } from 'next/router';
-import { styled } from 'styled-components';
+import { useRouter } from "next/router";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { styled } from "styled-components";
+import { mutate } from "swr";
 
-import { IcPlanet } from '@/public/assets/icons';
-import { StudyRoomInfo } from '@/types/studyroom';
-import { getCategoryColor } from '@/utils/getCategoryColor';
+import { pinRoom } from "@/apis/roomList";
+import { IcPlanet, IcStar, IcStarPinned } from "@/public/assets/icons";
+import { memberIdState, roomIdState } from "@/recoil/atom";
+import { StudyRoomInfo } from "@/types/studyroom";
+import { getCategoryColor } from "@/utils/getCategoryColor";
 
 interface StudyroomCardProps {
   roomData: StudyRoomInfo;
   roomType?: string;
+  isPinned?: boolean;
+  isMyroom?: boolean;
   handleApply?: () => void;
   handleManage?: () => void;
   handleEdit?: () => void;
@@ -16,6 +22,8 @@ interface StudyroomCardProps {
 const StudyroomCard = ({
   roomData,
   roomType,
+  isPinned,
+  isMyroom,
   handleApply,
   handleManage,
   handleEdit,
@@ -24,7 +32,7 @@ const StudyroomCard = ({
     roomId,
     roomName,
     roomIntro,
-    hashtags,
+    roomHashtags,
     roomCategory,
     roomCount,
     roomLimit,
@@ -32,29 +40,40 @@ const StudyroomCard = ({
   } = roomData;
 
   const router = useRouter();
+  const memberId = useRecoilValue(memberIdState);
   const planetColor = getCategoryColor(roomCategory);
 
   const isMemberApproved = isMember === '승인' || isMember === '팀장';
-  const canJoinRoom = isMemberApproved || roomLimit > roomCount;
-  const buttonText = handleApply ? '참여' : '입장';
+  const canJoinRoom =
+    isMemberApproved || (isMember === null && roomLimit > roomCount);
 
   const showManagementButtons = roomType === 'leader';
   const showStatus = roomType === 'apply';
 
+  const setroomID = useSetRecoilState(roomIdState);
+  const handlePin = async () => {
+    await pinRoom(roomId, memberId);
+    mutate(`/member/room/list?memberId=${memberId}`);
+  };
+
   const handleGotoRoom = () => {
+    setroomID(roomId);
     router.push(`/studyroom/${roomId}`);
   };
 
   return (
     <StCardWrapper>
       <StStudyroomCardWrapper>
-        <StIconWrapper planetColor={planetColor}>
+        <StStarWrapper onClick={handlePin}>
+          {isMyroom && (isPinned ? <IcStarPinned /> : <IcStar />)}
+        </StStarWrapper>
+        <StIconWrapper $planetColor={planetColor}>
           {roomId}
           <IcPlanet />
         </StIconWrapper>
         <StRoomName>{roomName}</StRoomName>
         <StHashtags>
-          {hashtags.map((hashtag) => (
+          {roomHashtags.map((hashtag) => (
             <li key={hashtag}>#{hashtag}</li>
           ))}
         </StHashtags>
@@ -65,13 +84,19 @@ const StudyroomCard = ({
             정원
             <span> {roomCount}</span> / {roomLimit}명
           </StLimit>
-          <StJoin
-            type="button"
-            disabled={!canJoinRoom}
-            onClick={handleApply || handleGotoRoom}
-          >
-            {buttonText}
-          </StJoin>
+          {isMember === null ? (
+            <StJoin type="button" onClick={handleApply}>
+              참여
+            </StJoin>
+          ) : (
+            <StEnter
+              type="button"
+              disabled={!canJoinRoom}
+              onClick={handleGotoRoom}
+            >
+              입장
+            </StEnter>
+          )}
         </StJoinWrapper>
       </StStudyroomCardWrapper>
       {showManagementButtons && (
@@ -85,7 +110,7 @@ const StudyroomCard = ({
         </StBtnWrapper>
       )}
       {showStatus && (
-        <StStatusWrapper memberStatus={isMember}>
+        <StStatusWrapper $memberStatus={isMember}>
           신청 현황 <span>{isMember}</span>
         </StStatusWrapper>
       )}
@@ -100,6 +125,7 @@ const StCardWrapper = styled.div`
 `;
 
 const StStudyroomCardWrapper = styled.article`
+  position: relative;
   display: flex;
   flex-direction: column;
 
@@ -113,11 +139,17 @@ const StStudyroomCardWrapper = styled.article`
   background: ${({ theme }) => theme.colors.White};
   color: ${({ theme }) => theme.colors.Gray1};
   ${({ theme }) => theme.fonts.Title5};
-
-  /* cursor: pointer; */
 `;
 
-const StIconWrapper = styled.div<{ planetColor: string }>`
+const StStarWrapper = styled.div`
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+
+  cursor: pointer;
+`;
+
+const StIconWrapper = styled.div<{ $planetColor: string }>`
   display: flex;
   justify-content: center;
   width: 100%;
@@ -129,7 +161,7 @@ const StIconWrapper = styled.div<{ planetColor: string }>`
     margin-top: 0.4rem;
 
     path {
-      fill: ${({ planetColor }) => planetColor};
+      fill: ${({ $planetColor }) => $planetColor};
     }
   }
 `;
@@ -199,7 +231,7 @@ const StLimit = styled.p`
   }
 `;
 
-const StJoin = styled.button`
+const StEnter = styled.button`
   padding: 0.2rem 0.7rem;
 
   border-radius: 0.4rem;
@@ -210,6 +242,11 @@ const StJoin = styled.button`
   ${({ theme }) => theme.fonts.Body8};
 
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+`;
+
+const StJoin = styled(StEnter)`
+  background-color: ${({ theme }) => theme.colors.Purple4};
+  color: ${({ theme }) => theme.colors.White};
 `;
 
 const StBtnWrapper = styled.div`
@@ -236,7 +273,7 @@ const StBtnWrapper = styled.div`
   }
 `;
 
-const StStatusWrapper = styled.div<{ memberStatus: string }>`
+const StStatusWrapper = styled.div<{ $memberStatus: string }>`
   display: flex;
   justify-content: center;
   gap: 0.3rem;
@@ -253,8 +290,8 @@ const StStatusWrapper = styled.div<{ memberStatus: string }>`
 
     border-radius: 0.4rem;
     ${({ theme }) => theme.fonts.Body4};
-    background-color: ${({ memberStatus }) => {
-      switch (memberStatus) {
+    background-color: ${({ $memberStatus }) => {
+      switch ($memberStatus) {
         case '승인':
           return '#0ACF84';
         case '거절':

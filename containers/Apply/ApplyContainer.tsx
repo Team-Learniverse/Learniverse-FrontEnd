@@ -1,14 +1,17 @@
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { styled } from 'styled-components';
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { styled } from "styled-components";
 
-import { applyRoom, decodeRoomId, getRoomInfo } from '@/apis/studyroom';
-import { CancelButton, ConfirmButton } from '@/components/Common/Button';
-import { LargeModal, SmallModal } from '@/components/Common/Modal';
-import { StudyroomCard } from '@/components/RoomCard';
-import useModal from '@/hooks/useModal';
-import { IcCharacterCheck } from '@/public/assets/icons';
-import { StudyRoomInfo } from '@/types/studyroom';
+import { applyRoom, decodeRoomId } from "@/apis/studyroom";
+import { CancelButton, ConfirmButton } from "@/components/Common/Button";
+import { LargeModal, SmallModal } from "@/components/Common/Modal";
+import { StudyroomCard } from "@/components/RoomCard";
+import { StudyroomCardSkeleton } from "@/components/RoomCard/Skeleton";
+import { useGetRoomInfo } from "@/hooks/StudyRooms";
+import useModal from "@/hooks/useModal";
+import { IcCharacterCheck } from "@/public/assets/icons";
+import { memberIdState } from "@/recoil/atom";
 
 interface ApplyContainerProps {
   url: string;
@@ -17,36 +20,20 @@ interface ApplyContainerProps {
 const ApplyContainer = ({ url }: ApplyContainerProps) => {
   const router = useRouter();
   const [roomId, setRoomId] = useState<number>(0);
-  const [roomInfo, setRoomInfo] = useState<StudyRoomInfo>();
+  const memberId = useRecoilValue(memberIdState);
+
+  const { roomInfo } = useGetRoomInfo(roomId, memberId);
 
   const applyModal = useModal();
   const applyCompleteModal = useModal();
 
-  // const ROOM_DATA = {
-  //   roomId: 27,
-  //   roomName: '러니버스',
-  //   roomIntro: '소웨공주들 졸프',
-  //   hashtags: ['졸프'],
-  //   roomCategory: '그룹/모임',
-  //   roomCount: 1,
-  //   roomLimit: 5,
-  //   isMember: '팀장',
-  // };
-
   const decodeId = async () => {
     const decodedUrl = await decodeRoomId(url);
-    console.log(decodedUrl);
     setRoomId(decodedUrl);
   };
 
-  const getRoomData = async () => {
-    if (roomId === 0) return;
-    const roomData = await getRoomInfo(roomId);
-    setRoomInfo(roomData);
-  };
-
   const handleApply = async () => {
-    await applyRoom(roomId, 2); // memberId=2
+    await applyRoom(roomId, memberId);
     applyModal.toggle();
     applyCompleteModal.toggle();
   };
@@ -54,7 +41,6 @@ const ApplyContainer = ({ url }: ApplyContainerProps) => {
   useEffect(() => {
     applyModal.setShowing(true);
     decodeId();
-    getRoomData();
   }, [roomId]);
 
   return (
@@ -62,8 +48,10 @@ const ApplyContainer = ({ url }: ApplyContainerProps) => {
       <LargeModal isShowing={applyModal.isShowing} title="스터디룸 참여">
         <StRoomCardWrapper>
           <p>스터디룸에 참여하시려면 참여 버튼을 눌러주세요.</p>
-          {roomInfo && (
+          {roomInfo ? (
             <StudyroomCard roomData={roomInfo} handleApply={handleApply} />
+          ) : (
+            <StudyroomCardSkeleton />
           )}
           <CancelButton
             btnName="취소"
@@ -117,7 +105,7 @@ const StRoomCardWrapper = styled.section`
   }
 `;
 
-const StSmallModalWrapper = styled.div`
+export const StSmallModalWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -125,7 +113,7 @@ const StSmallModalWrapper = styled.div`
   padding: 1.6rem;
 `;
 
-const StContentWrapper = styled.div`
+export const StContentWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.9rem;

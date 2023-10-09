@@ -1,5 +1,8 @@
-import { useRouter } from 'next/router';
-import { styled } from 'styled-components';
+import { useRouter } from "next/router";
+import { useSetRecoilState } from "recoil";
+import { styled } from "styled-components";
+
+import { memberIdState } from "@/recoil/atom";
 
 interface HeaderModalProps {
   isShowing: boolean;
@@ -8,12 +11,14 @@ interface HeaderModalProps {
 
 const HeaderModal = ({ isShowing }: HeaderModalProps) => {
   const router = useRouter();
+  const setMemberId = useSetRecoilState(memberIdState);
 
   const handleProfile = () => {
     console.log('프로필 설정 : 1차 데모 이후 구현');
   };
   const handleLogout = () => {
-    console.log('로그아웃 : 1차 데모 이후 구현');
+    setMemberId(1);
+    router.push('/');
   };
 
   return (
@@ -59,11 +64,6 @@ const StHeaderModalWrapper = styled.div`
   & > button {
     color: ${({ theme }) => theme.colors.White};
     ${({ theme }) => theme.fonts.Body2};
-  }
-  & > hr {
-    border: none;
-    border-top: 0.06rem solid ${({ theme }) => theme.colors.White};
-    width: 100%;
   }
   & > button:hover {
     color: ${({ theme }) => theme.colors.SkyBlue};

@@ -1,8 +1,10 @@
+import Image from "next/image";
 /* eslint-disable react/no-array-index-key */
-import { useEffect, useState } from 'react';
-import { styled } from 'styled-components';
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { styled } from "styled-components";
 
-import { getMoon } from '@/apis/moon';
+import { useGetMemberProfile, useGetMoon } from "@/hooks/members";
 import {
   IcMoon0,
   IcMoon1,
@@ -10,32 +12,29 @@ import {
   IcMoon3,
   IcMoon4,
   IcMoonBox,
-  IcProfileImage,
-} from '@/public/assets/icons';
-import { MoonInfo } from '@/types/member';
+  IcProfileImage
+} from "@/public/assets/icons";
+import { memberIdState } from "@/recoil/atom";
 
-import { MyPageStudyRoomList } from '../RoomList';
+import { MyPageStudyRoomList } from "../RoomList";
 
 const MyPage = () => {
+  const memberId = useRecoilValue(memberIdState);
   const [activeTab, setActiveTab] = useState(0);
-  // const [loading, setLoading] = useState(false);
   const [isLeader, setIsLeader] = useState(true);
-  const [moons, setMoons] = useState<MoonInfo[]>([]);
   const [moonScores, setMoonScores] = useState<number[]>([]);
-  const [isMoon, setIsMoon] = useState(false);
 
-  const getMoonData = async () => {
-    const moonData = await getMoon();
-    setMoons(moonData);
-    setIsMoon(true);
-  };
+  const { imgUrl, nickname } = useGetMemberProfile(memberId);
+  const { moons, isLoading } = useGetMoon(memberId);
 
   const getMoonScores = () => {
-    const scores = moons.map((moon) => moon.moonScore);
+    const scores = moons?.map((moon) => moon.moonScore) || [];
     setMoonScores(scores);
   };
 
   const matchMoonIcons = () => {
+    if (!Array.isArray(moonScores)) return [];
+
     const reversedMoonScores = [...moonScores].reverse();
 
     return reversedMoonScores.map((score, index) => {
@@ -58,33 +57,35 @@ const MyPage = () => {
 
   const handleTabClick = (tabValue: number) => {
     if (activeTab !== tabValue) {
-      // setLoading(true);
       setActiveTab(tabValue);
     }
   };
 
   useEffect(() => {
-    getMoonData();
     getMoonScores();
-  }, [isMoon]);
+  }, [isLoading]);
 
   useEffect(() => {
-    // setLoading(true);
     setIsLeader(activeTab === 0);
   }, [activeTab]);
-
-  // if (loading) return '로딩중..';
 
   return (
     <StMyPageWrapper>
       <h2>마이페이지</h2>
       <StMyInfo>
-        <StProfile>
-          <IcProfileImage />
-          <p>
-            <span>지민 </span>님 어서오세요 !
-          </p>
-        </StProfile>
+        {imgUrl && nickname && (
+          <StProfile>
+            <IcProfileImage />
+            <Image
+              className="githubImage"
+              src={imgUrl}
+              alt="profile"
+              width={77}
+              height={70}
+            />
+            <p>{nickname}</p>
+          </StProfile>
+        )}
         <StMoon>
           <p>나의 달</p>
           <IcMoonBox className="box" />
@@ -139,17 +140,21 @@ const StMyInfo = styled.section`
 `;
 
 const StProfile = styled.div`
+  position: relative;
+
+  & > .githubImage {
+    position: absolute;
+    top: 7.7rem;
+    left: 6.45rem;
+
+    border-radius: 10rem;
+  }
   & > p {
     margin-top: -1rem;
 
-    color: ${({ theme }) => theme.colors.White};
-    ${({ theme }) => theme.fonts.Title3};
+    color: ${({ theme }) => theme.colors.Purple2};
+    ${({ theme }) => theme.fonts.Title1};
     text-align: center;
-
-    & > span {
-      color: ${({ theme }) => theme.colors.Purple2};
-      ${({ theme }) => theme.fonts.Title1};
-    }
   }
 `;
 

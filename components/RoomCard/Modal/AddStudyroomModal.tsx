@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
-import { styled } from 'styled-components';
+import { useEffect, useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { styled } from "styled-components";
 
-import { createRoom } from '@/apis/roomList';
-import { IcAddTag, IcDeleteTag } from '@/public/assets/icons';
-import { encodedUrlState } from '@/recoil/atom';
-import { PostStudyRoomInfo } from '@/types/studyroom';
+import { createRoom } from "@/apis/roomList";
+import { getLanguages } from "@/apis/studyroom";
+import { IcAddTag, IcDeleteTag, IcLanguages } from "@/public/assets/icons";
+import { encodedUrlState, memberIdState } from "@/recoil/atom";
+import { PostStudyRoomInfo } from "@/types/studyroom";
 
-import { CancelButton, ConfirmButton } from '../../Common/Button';
-import { LargeModal } from '../../Common/Modal';
+import { CancelButton, ConfirmButton } from "../../Common/Button";
+import { LargeModal } from "../../Common/Modal";
+import Checkbox from "./CheckBox";
 
 interface AddStudyroomModalProps {
   isShowing: boolean;
@@ -25,10 +27,18 @@ const AddStudyroomModal = ({
   const [category, setCategory] = useState(5);
   const [hashtag, setHashtag] = useState('');
   const [hashtagList, setHashtagList] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [member, setMember] = useState(2);
   const [introduction, setIntroduction] = useState('');
   const [addRoomInfo, setAddRoomInfo] = useState<PostStudyRoomInfo>();
-  const [, setEncodedUrl] = useRecoilState(encodedUrlState);
+  const setEncodedUrl = useSetRecoilState(encodedUrlState);
+  const memberId = useRecoilValue(memberIdState);
+
+  const getLanguageData = async () => {
+    const languageData = await getLanguages();
+    setLanguages(languageData);
+  };
 
   const initInfo = () => {
     setStudyName('');
@@ -66,15 +76,29 @@ const AddStudyroomModal = ({
   };
 
   useEffect(() => {
+    if (isShowing) {
+      getLanguageData();
+    }
+  }, [isShowing]);
+
+  useEffect(() => {
     setAddRoomInfo({
-      member_id: 1,
+      memberId,
       roomName: studyName,
       roomCategory: category,
+      roomLanguages: selectedLanguages,
       roomIntro: introduction,
       roomLimit: member,
       roomHashtags: hashtagList,
     });
-  }, [studyName, category, hashtagList, member, introduction]);
+  }, [
+    studyName,
+    category,
+    selectedLanguages,
+    hashtagList,
+    member,
+    introduction,
+  ]);
 
   return (
     isShowing && (
@@ -111,6 +135,20 @@ const AddStudyroomModal = ({
               <option value="4">그룹/모임</option>
             </select>
           </StCategory>
+
+          <StLanguages>
+            <label htmlFor="language-checkbox">개발 언어(선택)</label>
+            <StLanguageWrapper>
+              {languages.map((lang) => (
+                <Checkbox
+                  key={lang}
+                  language={lang}
+                  setSelectedLanguages={setSelectedLanguages}
+                />
+              ))}
+              <IcLanguages />
+            </StLanguageWrapper>
+          </StLanguages>
 
           <StHashtag>
             <label htmlFor="hashtag">해시태그</label>
@@ -247,6 +285,32 @@ const StCategory = styled(StInputStudyName)`
     color: ${({ theme }) => theme.colors.White};
     background-color: ${({ theme }) => theme.colors.Purple4};
     ${({ theme }) => theme.fonts.Title5};
+  }
+`;
+
+const StLanguages = styled(StInputStudyName)`
+  position: relative;
+  display: flex;
+`;
+
+const StLanguageWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0rem 1rem;
+
+  width: 35.5rem;
+  height: 13rem;
+  margin: 1.5rem 0;
+  padding: 0rem 1.5rem;
+  box-sizing: border-box;
+
+  & > svg {
+    z-index: -1;
+
+    position: absolute;
+    top: -1rem;
+    right: -2rem;
   }
 `;
 

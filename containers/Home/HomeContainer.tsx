@@ -1,81 +1,64 @@
-import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { styled } from 'styled-components';
+import "firebase/messaging";
 
-import { addMoon } from '@/apis/moon';
-import { Home } from '@/components/Home';
-import { moonScoreState, todayState } from '@/recoil/atom';
-import { totalMoonScoreSelector } from '@/recoil/selector';
-import getToday from '@/utils/getToday';
+import firebase from "firebase/app";
+import { useEffect } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { styled } from "styled-components";
+
+import { createToken } from "@/apis/alarm";
+import { Home } from "@/components/Home";
+import { useFirebaseInit } from "@/hooks/FCM";
+import { fcmTokenState, memberIdState } from "@/recoil/atom";
 
 const HomeContainer = () => {
-  const totalMoonScore = useRecoilValue(totalMoonScoreSelector);
-  const [moonScore, setMoonScore] = useRecoilState(moonScoreState);
-  const [lastDay, setLastDay] = useRecoilState(todayState);
+  const memberId = useRecoilValue(memberIdState);
+  const [fcmToken, setFcmToken] = useRecoilState(fcmTokenState);
 
-  const isMax = () => {
-    return totalMoonScore >= 4;
+  useFirebaseInit();
+
+  const saveToken = async (token: string) => {
+    await createToken(memberId, token);
   };
 
-  const addFirstAccess = () => {
-    console.log('today');
-    if (isMax() || moonScore.isFirstAccess >= 1) return;
-    setMoonScore((prevMoonScore) => ({
-      ...prevMoonScore,
-      isFirstAccess: prevMoonScore.isFirstAccess + 1,
-    }));
-  };
+  const askPermission = async () => {
+    const permission = await window.Notification.requestPermission();
+    console.log('알림 허용 여부 : ', permission, ', FCM 토큰 : ', fcmToken);
+    // if (permission !== 'granted' || fcmToken) return;
 
-  // const addCoreTimeAccess = () => {
-  //   if (isMax()) return;
-  //   setMoonScore((prevMoonScore) => ({
-  //     ...prevMoonScore,
-  //     isCoreTimeParticipate: prevMoonScore.isCoreTimeParticipate + 1,
-  //   }));
-  // };
+    const messaging = firebase.messaging();
 
-  // const addCapture = () => {
-  //   if (isMax()) return;
-  //   setMoonScore((prevMoonScore) => ({
-  //     ...prevMoonScore,
-  //     isCapture: prevMoonScore.isCapture + 1,
-  //   }));
-  // };
+    if (permission === 'granted') {
+      messaging
+        .getToken({
+          vapidKey:
+            'BFkKBCZ5O4qmyCwm50Aks7sRmMYJzF2wJ8FZCHNLXDLjVxMDEQJFZ_4U5I6uDBF1zXiRHChNAeeDWrTg2m0eL_k',
+        })
+        .then((currentToken) => {
+          if (currentToken) {
+            console.log('currentToken', currentToken);
 
-  const initMoonScore = () => {
-    setMoonScore({
-      isFirstAccess: 0,
-      isCoreTimeParticipate: 0,
-      isCapture: 0,
-    });
-  };
-  console.log(lastDay);
-
-  useEffect(() => {
-    const today = getToday();
-    // const today = '2023-08-20';
-    if (lastDay !== today) {
-      console.log('추가');
-      setLastDay(today);
-      initMoonScore();
-      addFirstAccess();
+            saveToken(currentToken);
+            setFcmToken(currentToken);
+          } else {
+            console.log(
+              'No registration token available. Request permission to generate one.',
+            );
+          }
+        })
+        .catch((err) => {
+          console.log('An error occurred while retrieving token. ', err);
+        });
+    } else if (permission === 'denied') {
+      console.log('푸시 알림 권한이 차단되어 있습니다.');
     }
-  }, []);
+  };
 
   useEffect(() => {
-    const addMoons = async () => {
-      const res = await addMoon(totalMoonScore);
-      if (res === 400) return null;
-      return res;
-    };
-    addMoons();
-  }, [moonScore]);
+    askPermission();
+  }, [memberId]);
 
   return (
     <StHomeContainer>
-      {/* <button onClick={addFirstAccess}>첫 접속</button>
-      <button onClick={addCoreTimeAccess}>코어타임</button>
-      <button onClick={addCapture}>캡처</button> */}
       <Home />
     </StHomeContainer>
   );

@@ -1,10 +1,18 @@
-import { useState } from 'react';
-import { styled } from 'styled-components';
+import { Dispatch, SetStateAction, useState } from "react";
+import { styled } from "styled-components";
 
-import { IcSearch } from '@/public/assets/icons';
+import { IcSearch } from "@/public/assets/icons";
 
-const SearchInput = () => {
-  const [selectedInput, setSelectedInput] = useState(0);
+interface SearchInputProps {
+  handleSearch: (searchInput: string) => Promise<void>;
+  selectedInput: number;
+  setSelectedInput: Dispatch<SetStateAction<number>>;
+}
+const SearchInput = ({
+  handleSearch,
+  selectedInput,
+  setSelectedInput,
+}: SearchInputProps) => {
   const [searchInput, setSearchInputInput] = useState('');
 
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -13,8 +21,14 @@ const SearchInput = () => {
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInputInput(e.target.value);
   };
-  const handleSearch = () => {
-    console.log('검색 : 2차 데모 이후 개발');
+  const onSearch = () => {
+    if (!searchInput) return;
+    handleSearch(searchInput);
+  };
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onSearch();
+    }
   };
   return (
     <StSearchInputWrapper>
@@ -41,20 +55,21 @@ const SearchInput = () => {
           해시태그
         </StRadio>
       </StRadioWrapper>
-
       <StInputWrapper>
         <input
           type="text"
           name="search"
           value={searchInput}
           onChange={handleSearchInputChange}
+          onKeyPress={handleKeyPress}
           placeholder="방 이름 또는 해시태그를 입력해주세요."
         />
-        <button type="button" onClick={handleSearch}>
-          <StIconWrapper>
-            <IcSearch />
-          </StIconWrapper>
-        </button>
+        <StIconWrapper>
+          <IcSearch />
+          <button type="button" onClick={onSearch}>
+            search
+          </button>
+        </StIconWrapper>
       </StInputWrapper>
     </StSearchInputWrapper>
   );
@@ -132,7 +147,8 @@ const StInputWrapper = styled.div`
     z-index: 1;
 
     width: 80%;
-    margin-left: 3rem;
+    height: 6.6rem;
+    margin-top: 0.3rem;
     padding-left: 1rem;
 
     background: none;
@@ -147,20 +163,22 @@ const StInputWrapper = styled.div`
       outline: none;
     }
   }
-  & > button {
-    z-index: 1;
-
-    width: 7.3rem;
-    height: 7.3rem;
-    margin-top: 0.2rem;
-    margin-left: 1.6rem;
-
-    border-radius: 5rem;
-  }
 `;
 
 const StIconWrapper = styled.div`
   position: absolute;
   top: 0;
   left: 0;
+
+  & > button {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.4rem;
+
+    width: 7.3rem;
+    height: 7.3rem;
+
+    border-radius: 50%;
+    opacity: 0;
+  }
 `;

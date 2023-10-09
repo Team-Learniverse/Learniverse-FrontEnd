@@ -1,10 +1,10 @@
-import { useRecoilValue } from 'recoil';
-import { styled } from 'styled-components';
+import { useRecoilValue } from "recoil";
+import { styled } from "styled-components";
 
-import { CancelButton, ConfirmButton } from '@/components/Common/Button';
-import { SmallModal } from '@/components/Common/Modal';
-import { IcCharacterSpeaker } from '@/public/assets/icons';
-import { encodedUrlState } from '@/recoil/atom';
+import { CancelButton, ConfirmButton } from "@/components/Common/Button";
+import { SmallModal } from "@/components/Common/Modal";
+import { IcCharacterSpeaker } from "@/public/assets/icons";
+import { encodedUrlState } from "@/recoil/atom";
 
 interface CompleteModalProps {
   isShowing: boolean;
@@ -13,8 +13,8 @@ interface CompleteModalProps {
 
 const CompleteModal = ({ isShowing, handleCancel }: CompleteModalProps) => {
   const encodedUrl = useRecoilValue(encodedUrlState);
-  const linkToCopy = `https://learniverse/apply/${encodedUrl}`;
-  const linkToRoute = `http://localhost:3000/apply/${encodedUrl}`;
+  const linkToCopy = `learniverse-front-end.vercel.app/apply/${encodedUrl}`;
+  const linkToRoute = `learniverse-front-end.vercel.app/apply/${encodedUrl}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(linkToRoute).then(() => {

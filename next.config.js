@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const withPWA = require('next-pwa');
+
+const configs = {
   reactStrictMode: true,
   swcMinify: true,
   compiler: {
@@ -13,11 +16,27 @@ const nextConfig = {
     });
     return config;
   },
-  experimental: {
-    fontLoaders: [
-      { loader: 'next/font/google', options: { subsets: ['latin'] } },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+        pathname: '/u/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'learniverse-bucket.s3.us-east-2.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
+
+const nextConfig = withPWA({
+  dest: 'public',
+  runtimeCaching: [],
+})(configs);
 
 module.exports = nextConfig;
